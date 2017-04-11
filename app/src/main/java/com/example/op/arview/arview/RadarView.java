@@ -25,48 +25,18 @@ public class RadarView{
 	Location currentLocation = new Location("provider");
 	Location destinedLocation = new Location("provider");
 	private Location mCurrent;
+	
+	public float[][] coordinateArray;
 
-	/*
-	 * pass the same set of coordinates to plot POI's on radar
-	 * */
-	// SF Art Commission, SF Dept. of Public Health, SF Ethics Comm, SF Conservatory of Music, All Star Cafe, Magic Curry Cart, SF SEO Marketing, SF Honda, 
-	// SF Mun Transport Agency, SF Parking Citation, Mayors Office of Housing, SF Redev Agency, Catario Patrice, Bank of America , SF Retirement System, Bank of America Mortage,
-	// Writers Corp., Van Nes Keno Mkt.
-	double[] latitudes = new double[] {
-			10.8428108,
-			10.8428529, //chùa minh kiến đài
-			10.8435799, // nhà sách nguyễn du
-			10.8423234, // nhà A
-			10.8418834,
-			10.8418624,
-			10.8418413,
-			10.8433481,
-			10.8452870,
-			10.8440436,
-	};
-	double[] longitudes = new double[] {
-			106.663897,
-			106.664379, //chùa minh kiến đài
-			106.664580, // nhà sách nguyễn du
-			106.665570, // nhà A
-			106.664628,
-			106.663502,
-			106.662247,
-			106.659811,
-			106.662526,
-			106.667343, // nha thieu nhi
-	};
-	
-	public float[][] coordinateArray = new float[latitudes.length][2];
-	
 	float angleToShift;
 	public float degreetopixel;
 	public float bearing;
 	public float circleOriginX;
 	public float circleOriginY;
 	private float mscale;
-	
-	
+    private CustomLocation locations;
+	private int nLocation =0;
+
 	public float x = 0;
 	public float y = 0;
 	public float z = 0;
@@ -74,23 +44,25 @@ public class RadarView{
 	float  yaw = 0;
 	double[] bearings;
 	ARView arView = new ARView();
-	
-	public RadarView(DataView dataView, double[] bearings, Location curPos){
+
+	public RadarView(DataView dataView, double[] bearings, Location curPos, CustomLocation locations){
+        this.locations = locations;
+        nLocation = locations.data.length;
 		this.bearings = bearings;
 		mCurrent = curPos;
 		calculateMetrics();
 	}
-	
+
 	public void calculateMetrics(){
 		circleOriginX = originX + RADIUS;
 		circleOriginY = originY + RADIUS;
-		
+
 		range = (float)arView.convertToPix(10) * 50;
 		mscale = range / arView.convertToPix((int)RADIUS);
 	}
-	
+
 	public void paint(PaintUtils dw, float yaw) {
-		
+
 //		circleOriginX = originX + RADIUS;
 //		circleOriginY = originY + RADIUS;
 		this.yaw = yaw;
@@ -108,15 +80,15 @@ public class RadarView{
         currentLocation.setLatitude(mCurrent.getLatitude());
         currentLocation.setLongitude(mCurrent.getLongitude());
 
-		
-		for(int i = 0; i <latitudes.length;i++){
-			destinedLocation.setLatitude(latitudes[i]);
-			destinedLocation.setLongitude(longitudes[i]);
+
+		for(int i = 0; i <nLocation;i++){
+			destinedLocation.setLatitude(locations.data[i].lat);
+			destinedLocation.setLongitude(locations.data[i].lon);
 			convLocToVec(currentLocation, destinedLocation);
 			float x = this.x / mscale;
 			float y = this.z / mscale;
 
-			
+
 			if (x * x + y * y < RADIUS * RADIUS) {
 				dw.setFill(true);
 				dw.setColor(Color.rgb(255, 255, 255));
@@ -128,7 +100,8 @@ public class RadarView{
 	public void calculateDistances(PaintUtils dw, float yaw){
 		currentLocation.setLatitude(10.8428107);
 		currentLocation.setLongitude(106.663896);
-		for(int i = 0; i <latitudes.length;i++){
+        coordinateArray = new float[nLocation][2];
+		for(int i = 0; i <nLocation;i++){
 			if(bearings[i]<0){
 				bearings[i] = 360 - bearings[i];
 			}
@@ -139,8 +112,8 @@ public class RadarView{
 				angleToShift = (float)bearings[i] - coordinateArray[i][0] ;
 				
 			}
-			destinedLocation.setLatitude(latitudes[i]);
-			destinedLocation.setLongitude(longitudes[i]);
+			destinedLocation.setLatitude(locations.data[i].lat);
+			destinedLocation.setLongitude(locations.data[i].lon);
 			float[] z = new float[1];
 			z[0] = 0;
 			Location.distanceBetween(currentLocation.getLatitude(), currentLocation.getLongitude(), destinedLocation.getLatitude(), destinedLocation.getLongitude(), z);

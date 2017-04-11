@@ -19,11 +19,11 @@ public class CustomLocation {
 }
 class Data {
     String name ="";
-    Float lat = 0f;
-    Float lon = 0f;
+    Double lat = 0d;
+    Double lon = 0d;
     String img = "";
 
-    public Data(String name, Float lat, Float lon, String img) {
+    public Data(String name, Double lat, Double lon, String img) {
         this.name = name;
         this.lat = lat;
         this.lon= lon;

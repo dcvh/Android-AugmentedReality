@@ -1,6 +1,9 @@
 package com.example.op.arview.arview;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -18,6 +21,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.op.arview.FindPath.FindPath;
 import com.example.op.arview.MainActivity;
 import com.example.op.arview.R;
 import com.example.op.arview.utils.Camera;
@@ -61,7 +65,7 @@ public class DataView {
 	/** width and height of the view*/
 	int width, height;
 	android.hardware.Camera camera;
-
+    private static Context context;
 	float yawPrevious;
 	float yaw = 0;
 	float pitch = 0;
@@ -90,8 +94,14 @@ public class DataView {
 		return isInit;
 	}
 
-	public void updateLocation(Location curpos){
-        mCurrent = curpos;
+	public void updateLocation(Location curPos){
+		if (curPos == null) {
+			mCurrent = new Location("provider");
+			mCurrent.setLatitude(10.8428107);
+			mCurrent.setLongitude(106.663896);
+		} else {
+			mCurrent = curPos;
+		}
 
         Toast.makeText(_context, String.valueOf("curPos: " + mCurrent.getLatitude()), Toast.LENGTH_SHORT).show();
 
@@ -114,14 +124,12 @@ public class DataView {
             bearings[i] = bearing;
 
         }
-        radarPoints = new RadarView(this, bearings, mCurrent);
+        radarPoints = new RadarView(this, bearings, mCurrent, locations);
     }
 
-	public void init(int widthInit, int heightInit, android.hardware.Camera camera,
+	public void init( int widthInit, int heightInit, android.hardware.Camera camera,
 					 DisplayMetrics displayMetrics, RelativeLayout rel, Location curPos,
 					 CustomLocation locations) {
-
-
 		if (curPos == null) {
             mCurrent = new Location("provider");
             mCurrent.setLatitude(10.8428107);
@@ -190,33 +198,7 @@ public class DataView {
 
 					@Override
 					public void onClick(View v) {
-						if (v.getId() != -1) {
-
-							RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) locationMarkerView[v.getId()].getLayoutParams();
-							Rect rect = new Rect(params.leftMargin, params.topMargin, params.leftMargin + params.width, params.topMargin + params.height);
-							ArrayList<Integer> matchIDs = new ArrayList<Integer>();
-							Rect compRect = new Rect();
-							int index = 0;
-							for (RelativeLayout.LayoutParams layoutparams : layoutParams) {
-								compRect.set(layoutparams.leftMargin, layoutparams.topMargin,
-										layoutparams.leftMargin + layoutparams.width, layoutparams.topMargin + layoutparams.height);
-								if (compRect.intersect(rect)) {
-									matchIDs.add(index);
-								}
-								index++;
-							}
-
-							if (matchIDs.size() > 1) {
-
-							}
-							Toast.makeText(_context, "Number of places here = "+matchIDs.size(), Toast.LENGTH_SHORT).show();
-
-							locationMarkerView[v.getId()].bringToFront();
-
-//							locationMarkerView[v.getId()].bringToFront();
-//							Toast.makeText(_context, " LOCATION NO : "+v.getId(), Toast.LENGTH_SHORT).show();
-						}
-
+                        processOnClickLocation(v);
 					}
 				});
 
@@ -225,66 +207,14 @@ public class DataView {
 
 					@Override
 					public void onClick(View v) {
-						if ((v.getId() != -1)) {
-
-							RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) locationMarkerView[v.getId()].getLayoutParams();
-							Rect rect = new Rect(params.leftMargin, params.topMargin, params.leftMargin + params.width, params.topMargin + params.height);
-							ArrayList<Integer> matchIDs = new ArrayList<Integer>();
-							Rect compRect = new Rect();
-							int index = 0;
-							for (RelativeLayout.LayoutParams layoutparams : layoutParams) {
-								compRect.set(layoutparams.leftMargin, layoutparams.topMargin,
-										layoutparams.leftMargin + layoutparams.width, layoutparams.topMargin + layoutparams.height);
-								if (compRect.intersect(rect)) {
-									matchIDs.add(index);
-								}
-								index++;
-							}
-
-							if (matchIDs.size() > 1) {
-
-							}
-							Toast.makeText(_context, "Number of places here = "+matchIDs.size(), Toast.LENGTH_SHORT).show();
-
-							locationMarkerView[v.getId()].bringToFront();
-
-//							locationMarkerView[v.getId()].bringToFront();
-//							Toast.makeText(_context, " LOCATION NO : "+v.getId(), Toast.LENGTH_SHORT).show();
-						}
-
+                        processOnClickLocation(v);
 					}
 				});
 
 				locationMarkerView[i].setOnClickListener(new OnClickListener() {
-
 					@Override
 					public void onClick(View v) {
-						if (v.getId() != -1) {
-							RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) locationMarkerView[v.getId()].getLayoutParams();
-							Rect rect = new Rect(params.leftMargin, params.topMargin, params.leftMargin + params.width, params.topMargin + params.height);
-							ArrayList<Integer> matchIDs = new ArrayList<Integer>();
-							Rect compRect = new Rect();
-							int count = 0;
-							int index = 0;
-							for (RelativeLayout.LayoutParams layoutparams : layoutParams) {
-								compRect.set(layoutparams.leftMargin, layoutparams.topMargin,
-										layoutparams.leftMargin + layoutparams.width, layoutparams.topMargin + layoutparams.height);
-								if (compRect.intersect(rect)) {
-									matchIDs.add(index);
-									count+=1;
-								}
-								index++;
-							}
-
-							if (count > 1) {
-
-							}
-							Toast.makeText(_context, "Number of places here = "+count, Toast.LENGTH_SHORT).show();
-
-							locationMarkerView[v.getId()].bringToFront();
-							Toast.makeText(_context, " LOCATION NO : "+v.getId(), Toast.LENGTH_SHORT).show();
-						}
-
+                        processOnClickLocation(v);
 					}
 				});
 			}
@@ -315,7 +245,7 @@ public class DataView {
 				bearings[i] = bearing;
 
 			}
-			radarPoints = new RadarView(this, bearings, mCurrent);
+			radarPoints = new RadarView(this, bearings, mCurrent, locations);
 			this.camera = camera;
 			width = widthInit;
 			height = heightInit;
@@ -336,7 +266,70 @@ public class DataView {
 		isInit = true;
 	}
 
-	public void draw(PaintUtils dw, float yaw, float pitch, float roll) {
+    private void processOnClickLocation(final View v) {
+        if (v.getId() != -1) {
+            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) locationMarkerView[v.getId()].getLayoutParams();
+            Rect rect = new Rect(params.leftMargin, params.topMargin, params.leftMargin + params.width, params.topMargin + params.height);
+            ArrayList<Integer> matchIDs = new ArrayList<Integer>();
+            Rect compRect = new Rect();
+            int count = 0;
+            int index = 0;
+            for (RelativeLayout.LayoutParams layoutparams : layoutParams) {
+                compRect.set(layoutparams.leftMargin, layoutparams.topMargin,
+                        layoutparams.leftMargin + layoutparams.width, layoutparams.topMargin + layoutparams.height);
+                if (compRect.intersect(rect)) {
+                    matchIDs.add(index);
+                    count+=1;
+                }
+                index++;
+            }
+
+            final int id = v.getId();
+            if (count > 1) {
+                Toast.makeText(_context, "Number of places here = "+count, Toast.LENGTH_SHORT).show();
+            } else {
+                final CharSequence[] items = {
+                        "Find path to this location", "View more info"
+                };
+                AlertDialog.Builder builder = new AlertDialog.Builder(_context);
+                builder.setTitle("Choose action")
+                        .setItems(items, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                if (which == 0) {
+                                    Intent intent = new Intent(_context, FindPath.class);
+                                    intent.putExtra("beginLat",mCurrent.getLatitude());
+                                    intent.putExtra("beginLon",mCurrent.getLongitude());
+                                    intent.putExtra("endLat",locations.data[id].lat);
+                                    intent.putExtra("endLon", locations.data[id].lon);
+                                    intent.putExtra("distination",locations.data[id].name);
+
+                                    _context.startActivity(intent);
+                                }
+                                else {
+                                    Intent intent = new Intent(_context, DetailLocation.class);
+                                    intent.putExtra("lat",locations.data[id].lat);
+                                    intent.putExtra("lon", locations.data[id].lon);
+                                    intent.putExtra("name",locations.data[id].name);
+                                    intent.putExtra("img",locations.data[id].img);
+
+                                    _context.startActivity(intent);
+                                }
+                            }
+                        });
+
+                AlertDialog alert = builder.create();
+                alert.show();
+            }
+
+
+            //locationMarkerView[v.getId()].bringToFront();
+            //Toast.makeText(_context, " LOCATION NO : "+v.getId(), Toast.LENGTH_SHORT).show();
+
+
+        }
+    }
+
+    public void draw(PaintUtils dw, float yaw, float pitch, float roll) {
 
 
 		this.yaw = yaw;

@@ -418,12 +418,12 @@ public class ARView extends Activity implements SensorEventListener {
                     public void onClick(DialogInterface arg0, int arg1) {
                         Data[] dummy = new Data[6];
 
-                        dummy[0] = new Data("Chùa Minh Kiến Đài", 10.8420836f, 106.66506f, "accountancy");
-                        dummy[1] = new Data("Ngã tư Quang Trung", 10.8341279f, 106.665937f, "mydefault");
-                        dummy[2] = new Data("Trường THCS Nguyễn Du", 10.8444073f, 106.662778f, "schools");
-                        dummy[3] = new Data("HCMUS",10.7620684f ,106.68283f , "schools");
-                        dummy[4] = new Data("Nowzone", 10.7637943f,106.683551f  , "movies");
-                        dummy[5] = new Data("<3",10.8665766f ,106.608887f , "astrology");
+                        dummy[0] = new Data("Chùa Minh Kiến Đài", 10.8420836d, 106.66506d, "accountancy");
+                        dummy[1] = new Data("Ngã tư Quang Trung", 10.8341279d, 106.665937d, "mydefault");
+                        dummy[2] = new Data("Trường THCS Nguyễn Du", 10.8444073d, 106.662778d, "schools");
+                        dummy[3] = new Data("HCMUS",10.7620684d ,106.68283d , "schools");
+                        dummy[4] = new Data("Nowzone", 10.7637943d,106.683551d  , "movies");
+                        dummy[5] = new Data("<3",10.8665766d ,106.608887d , "astrology");
 
                         locations = new CustomLocation(dummy);
 

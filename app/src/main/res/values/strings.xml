@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">ARView</string>
+    <string name="title_activity_find_path">Map</string>
 </resources>
